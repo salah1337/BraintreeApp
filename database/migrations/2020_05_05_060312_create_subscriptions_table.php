@@ -14,7 +14,13 @@ class CreateSubscriptionsTable extends Migration
     public function up()
     {
         Schema::create('subscriptions', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
+            $table->string('planId');
+            $table->string('paymentMethods');
+            $table->integer('braintree_id');
+            $table->bigInteger('customer_id')->unsigned();
+            $table->foreign('customer_id')->references('id')->on('customers')
+                ->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
