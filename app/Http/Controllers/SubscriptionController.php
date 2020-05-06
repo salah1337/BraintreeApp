@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Subscription;
 use Illuminate\Http\Request;
-
+use App\Customer;
+use Auth;
+use Session;
 class SubscriptionController extends Controller
 {
     /**
@@ -14,7 +16,18 @@ class SubscriptionController extends Controller
      */
     public function index()
     {
-        //
+        $customer = Customer::where(['user_id' => Auth::user()->id])->exists();
+        if ($customer) {
+            $subscription = Subscription::where(['customer_id' => $customer['id']])->exists();
+            if ($subscription) {
+                Session::flash('message', 'You are already subbcribed.'); 
+                return view('home');
+            }else{
+                return view('/subscription/create');
+            }
+        }else{
+            return view('/customer/create');
+        }
     }
 
     /**

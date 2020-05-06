@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Customer;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use App\Providers\AppServiceProvider;
+use App\Customer;
+Use Braintree;
+use Auth;
+use Session;
 class CustomerController extends Controller
 {
     /**
@@ -14,9 +18,13 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        //
+        $count = Customer::count();
+        return "There are"." ".$count." "."users.";
     }
-
+    public function all()
+    {
+        return Customer::all();
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -24,9 +32,13 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        //
-    }
+        if ( Customer::where(['user_id'=>Auth::user()->id])->exists() ){
+            Session::flash('message', 'You are already a customer!'); 
+            return view('home');
+        }
 
+        return view('customer.create');
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -36,26 +48,46 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         //
+        $gateway = app()->make('Gateway');
+
+        $result = $gateway->customer()->create([
+            'firstName' => $request->get('firstName'),
+            'lastName' => $request->get('lastName'),
+            'email' => Auth::user()->email,
+        ]);
+        if ( Customer::where(['user_id'=>Auth::user()->id])->exists() ){
+            Session::flash('message', 'You are already a customer!'); 
+            return view('home');
+        }
+        $mycustomer = Customer::create([
+            "firstName" => $result->customer->firstName,
+            "lastName" => $result->customer->lastName,
+            "braintree_id" => $result->customer->id,
+            "user_id"=>Auth::user()->id,
+        ]);
+        Session::flash('message', 'Customer created succesfully.');
+        return view('home');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Customer  $customer
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Customer $customer)
+    public function show($id)
     {
         //
+
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Customer  $customer
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Customer $customer)
+    public function edit($id)
     {
         //
     }
@@ -64,10 +96,10 @@ class CustomerController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Customer  $customer
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -75,10 +107,10 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Customer  $customer
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Customer $customer)
+    public function destroy($id)
     {
         //
     }

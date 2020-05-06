@@ -15,11 +15,6 @@ $factory->define(Customer::class, function (Faker $faker) {
     return [
         'firstName' => $firstName,
         'lastName' => $faker->name,
-        'company' => $companyName,
-        'email' => $randomUser->email,
-        'website' => $firstName.'@'.$companyName.'.com',
-        'phone' => $faker->phoneNumber,
-        'fax' => $faker->phoneNumber,
         'braintree_id' => $faker->unique()->randomDigit,
         'user_id' => $randomUser->id
     ];

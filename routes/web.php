@@ -19,4 +19,12 @@ Route::get('/', function () {
 
 Auth::routes();
 
+
 Route::get('/home', 'HomeController@index')->name('home');
+Route::prefix('/customer')->group( function(){
+  
+    Route::get('/', 'CustomerController@create')->middleware('auth');
+    
+});
+Route::post('/customer/create', 'CustomerController@store')->middleware('auth');
+Route::get('/subscription/', 'SubscriptionController@index')->middleware('auth');
