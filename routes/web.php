@@ -22,9 +22,10 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::prefix('/customer')->group( function(){
-  
-    Route::get('/', 'CustomerController@create')->middleware('auth');
-    
+    Route::get('/create', 'CustomerController@create')->middleware('auth');
+    Route::post('/create', 'CustomerController@store')->middleware('auth');
 });
-Route::post('/customer/create', 'CustomerController@store')->middleware('auth');
-Route::get('/subscription/', 'SubscriptionController@index')->middleware('auth');
+Route::prefix('/subscription')->group( function(){
+    Route::get('/create', 'SubscriptionController@create')->middleware('auth');
+    Route::post('/create', 'SubscriptionController@store')->middleware('auth');
+});

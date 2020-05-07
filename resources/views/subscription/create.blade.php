@@ -2,20 +2,17 @@
 
 @section('content')
 
-<form method="POST" action="/customer/create" class="container">
+<form method="POST" action="/subscription/create" class="container">
     {{ csrf_field() }}
-    @auth
-        {{Auth::user()->email}}
-    @endauth
     <div class="form-group">
-      <label for="firstName">First Name</label>
-      <input required type="text" class="form-control" name="firstName" id="firstName"placeholder="first name">
+      <label for="plansSelect">Plan</label>
+      <select name="planId" id="plansSelect">
+        <option value="monthly_plan">1 month</option>
+        <option value="bi_yearly_plan">6 months</option>
+        <option value="yearly_plan">12 months</option>
+      </select>
     </div>
-    <div class="form-group">
-      <label for="lastName">Last Name</label>
-      <input required type="text" class="form-control" name="lastName" id="lastName"placeholder="last name">
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Sub</button>
 </form>
 
 @endsection

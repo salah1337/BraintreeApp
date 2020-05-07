@@ -54,6 +54,7 @@ class CustomerController extends Controller
             'firstName' => $request->get('firstName'),
             'lastName' => $request->get('lastName'),
             'email' => Auth::user()->email,
+            'paymentMethodNonce' => $request->get('paymentMethodNonce'),
         ]);
         if ( Customer::where(['user_id'=>Auth::user()->id])->exists() ){
             Session::flash('message', 'You are already a customer!'); 

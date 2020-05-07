@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Customer;
 use Auth;
 use Session;
+use Braintree;
 class SubscriptionController extends Controller
 {
     /**
@@ -38,6 +39,18 @@ class SubscriptionController extends Controller
     public function create()
     {
         //
+        $customer = Customer::where(['user_id' => Auth::user()->id])->exists();
+        if ($customer) {
+            $subscription = Subscription::where(['customer_id' => $customer['id']])->exists();
+            if ($subscription) {
+                Session::flash('message', 'You are already subbcribed.'); 
+                return view('home');
+            }else{
+                return view('/subscription/create');
+            }
+        }else{
+            return view('/customer/create');
+        }
     }
 
     /**
@@ -49,6 +62,22 @@ class SubscriptionController extends Controller
     public function store(Request $request)
     {
         //
+
+        $gateway = app()->make('Gateway');
+        $myCustomer = Customer::where([ 'user_id' => Auth::user()->id])->first();
+        $braintreeCustomer = $gateway->customer()->find($myCustomer['braintree_id']);
+
+        $res = $gateway->subscription()->create([
+            'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
+            'planId' => $request->get('planId')
+        ]);
+        if ($res->success) {
+            Session::flash('message', 'Subscription created Successfully, check your dashboard for more info.'); 
+            return view('home');
+        }else{
+            return "Something went wrong.";
+        }
+        return "Something went wrong.";
     }
 
     /**
