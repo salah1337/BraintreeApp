@@ -19,12 +19,11 @@ class SubscriptionController extends Controller
     {
         $customer = Customer::where(['user_id' => Auth::user()->id])->exists();
         if ($customer) {
-            $subscription = Subscription::where(['customer_id' => $customer['id']])->exists();
-            if ($subscription) {
-                Session::flash('message', 'You are already subbcribed.'); 
-                return view('home');
+            $subscriptions = Subscription::where(['customer_id' => $customer['id']])->exists();
+            if (!$subscriptions) {
+                return Redirect::to('subscription/create');
             }else{
-                return view('/subscription/create');
+                return view('/subscription');
             }
         }else{
             return view('/customer/create');
@@ -69,6 +68,7 @@ class SubscriptionController extends Controller
             'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
             'planId' => $request->get('planId')
         ]);
+        dd($res->subscription);
         if ($res->success) {
             Session::flash('message', 'Subscription created Successfully, check your dashboard for more info.'); 
             return Redirect::to('home');
@@ -84,9 +84,9 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function show(Subscription $subscription)
+    public function show()
     {
-        //
+        
     }
 
     /**

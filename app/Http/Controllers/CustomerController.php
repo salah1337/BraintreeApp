@@ -99,8 +99,9 @@ class CustomerController extends Controller
         $myCustomer = $myCustomer->first();
         /** get braintree customer */
         $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
-
-        return $braintreeCustomer;
+        $data['myCustomer'] = $myCustomer;
+        $data['braintreeCustomer'] = $braintreeCustomer;
+        return view('customer.show', $data);
     }
 
     /**
@@ -117,6 +118,7 @@ class CustomerController extends Controller
             return view('customer.create');
         }
         $data = $myCustomer->first();
+
         return view('customer.edit', $data);
         
     }
@@ -152,7 +154,7 @@ class CustomerController extends Controller
             ]
         );
         /** update our customer */
-        Customer::where(['user_id'=>Auth::user()->id])->update([
+        $myCustomer->update([
             "firstName" => $updatedBraintreeCustomer->customer->firstName,
             "lastName" => $updatedBraintreeCustomer->customer->lastName,
             "braintree_id" => $updatedBraintreeCustomer->customer->id,
@@ -188,7 +190,7 @@ class CustomerController extends Controller
         /** delete braintree customer */
         $result = $gateway->customer()->delete($myCustomer->braintree_id);
         /** delete our customer */
-        Customer::where(['user_id'=>Auth::user()->id])->delete();
+        $myCustomer->delete();
         if ($result->success) {
             Session::flash('message', 'Customer deleted succesfully.');
             return Redirect::to('home');
