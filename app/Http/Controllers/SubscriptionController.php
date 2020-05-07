@@ -44,12 +44,12 @@ class SubscriptionController extends Controller
             $subscription = Subscription::where(['customer_id' => $customer['id']])->exists();
             if ($subscription) {
                 Session::flash('message', 'You are already subbcribed.'); 
-                return view('home');
+                return Redirect::to('home');
             }else{
                 return view('/subscription/create');
             }
         }else{
-            return view('/customer/create');
+            return Redirect::to('customer/create');
         }
     }
 
@@ -61,8 +61,6 @@ class SubscriptionController extends Controller
      */
     public function store(Request $request)
     {
-        //
-
         $gateway = app()->make('Gateway');
         $myCustomer = Customer::where([ 'user_id' => Auth::user()->id])->first();
         $braintreeCustomer = $gateway->customer()->find($myCustomer['braintree_id']);
@@ -73,7 +71,7 @@ class SubscriptionController extends Controller
         ]);
         if ($res->success) {
             Session::flash('message', 'Subscription created Successfully, check your dashboard for more info.'); 
-            return view('home');
+            return Redirect::to('home');
         }else{
             return "Something went wrong.";
         }
