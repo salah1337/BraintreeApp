@@ -74,9 +74,9 @@ class SubscriptionController extends Controller
             return Redirect::view('customer.create');
         }
         /** get our customer */
-        $mycustomer = $myCustomer->first();
+        $myCustomer = $myCustomer->first();
         /** get braintree customer */
-        $braintreeCustomer = $gateway->customer()->find($myCustomer['braintree_id']);
+        $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
         /** create subscription */
         $res = $gateway->subscription()->create([
             'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
@@ -125,7 +125,7 @@ class SubscriptionController extends Controller
         /** create gateway */
         $gateway = app()->make('Gateway');
         /** check if subscription belongs to logged in customer */
-        if ( !$mySubscription->customer_id == $myCustomer->id ){
+        if ( $mySubscription->customer_id !== $myCustomer->id ){
             /** this is returning not found if the logged in customer isn't the subscription owner,
              *  i'm not sure if this would make a security concern but better be safe than sorry. */
             return view('errors.404');
@@ -141,7 +141,7 @@ class SubscriptionController extends Controller
         $data['Subscription']->updatedAt = $braintreeSubscription->updatedAt->format($format);
         $data['Subscription']->firstBillingDate = $braintreeSubscription->firstBillingDate->format($format);
         $data['Subscription']->nextBillingDate = $braintreeSubscription->nextBillingDate->format($format);
-        
+        $data['mySubscription'] = $mySubscription;
         return view('subscription.show', $data);
     }
 
@@ -176,12 +176,32 @@ class SubscriptionController extends Controller
      */
     public function cancel($id)
     {
+        /** check if subscription exists */
+        $mySubscription = Subscription::find($id);
+        if( !$mySubscription ){
+            return view('errors.404');
+        }
+        /** check if user is a customer */
+        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
+        if( !$myCustomer->exists() ){
+            return Redirect::view('customer.create');
+        }
+        /** get our customer */
+        $myCustomer = $myCustomer->first();
         /** create gateway */
         $gateway = app()->make('Gateway');
-
-        $braintreeSubscription = $gateway->subscription()->find($mySubscription['braintree_id']);
+        /** check if subscription belongs to logged in customer */
+        if ( $mySubscription->customer_id !== $myCustomer->id ){
+            /** this is returning not found if the logged in customer isn't the subscription owner,
+             *  i'm not sure if this would make a security concern but better be safe than sorry. */
+            return view('errors.404');
+        }
         /** cancel subscription */
-        $result = $gateway->subscription()->cancel($id);
+        $result = $gateway->subscription()->cancel($mySubscription->braintree_id);
+
+        Subscription::where(['id' => $id])->update([
+            'status' => $result->subscription->status
+        ]);
         if ( $result->success ){
             Session::flash('message', 'Your subscription has been cancled, sad to see you go :(.'); 
             return Redirect::to('home');

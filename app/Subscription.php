@@ -12,7 +12,7 @@ class Subscription extends Model
      * @var array
      */
     protected $fillable = [
-        'paymentMethodToken','planId','braintree_id','customer_id'
+        'paymentMethodToken','planId','braintree_id','customer_id','status'
     ];
 
     /**

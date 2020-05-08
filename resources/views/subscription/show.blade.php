@@ -19,7 +19,9 @@
             @endif
             <br/>
             <br/>
-            <a class="btn btn-danger" href="/subscription/cancel/{{ $Subscription->id }}">Cancel</a>
+            <a class="btn btn-primary" href="{{ URL::previous() }}">Back</a>
+            <a class="btn btn-warning" href="/subscription/update/{{ $mySubscription->id }}">Change Subscription</a>
+            <a class="btn btn-danger" href="/subscription/cancel/{{ $mySubscription->id }}">Cancel</a>
         @else
             <a class="btn btn-primary" href="{{ URL::previous() }}">Back</a>
             <a class="btn btn-success" href="/subscription/create">Subscribe Again</a>

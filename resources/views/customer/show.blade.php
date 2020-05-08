@@ -24,17 +24,26 @@
     @endforeach
     <br/>
     <br/>
-    @if ($subscriptions)
-        @foreach ($subscriptions as $subscription)
+    @if ($subscription)
+        <h4>
+            Active Subscription:
+        </h4>
+        <h5>
             Plan: {{ $subscription->planId }}
             <br/>
             Created at: {{ substr($subscription->created_at, 0, 10) }}
             <br/>
             <a href="/subscription/show/{{$subscription->id}}">More</a>
             <br/>
-            <br/>
-        @endforeach
+        </h5>
+    @else
+        You have no active subscriptions.
+        <br/>
+        <a href="/subscription/create" class="btn btn-success">Subscribe</a>
     @endif
+        <br/>
+        <a href="/subscription/show/all">See subscription history</a>
+        <br/>
 </div>
 
 @endsection
