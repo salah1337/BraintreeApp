@@ -9,6 +9,7 @@ use Auth;
 use Session;
 use Braintree;
 use Redirect;
+use DateTime;
 class SubscriptionController extends Controller
 {
     /**
@@ -74,7 +75,7 @@ class SubscriptionController extends Controller
                 'paymentMethodToken' => $braintreeSubscription->paymentMethodToken,
                 'planId' => $braintreeSubscription->planId,
                 'braintree_id' => $braintreeSubscription->id,
-                'customer_id' => (int) $myCustomer->id,
+                'customer_id' => $myCustomer->id,
             ]);
             Session::flash('message', 'Subscription created Successfully, check your dashboard for more info.'); 
             return Redirect::to('home');
@@ -90,9 +91,23 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function show()
+    public function show($id)
     {
         
+        $mySubscription = Subscription::find($id);
+        $gateway = app()->make('Gateway');
+        $braintreeSubscription = $gateway->subscription()->find($mySubscription['braintree_id']);
+        $format = 'd/m/Y';
+
+
+        $data['Subscription'] = $braintreeSubscription;
+        $data['Subscription']->createdAt = $braintreeSubscription->createdAt->format($format);
+        $data['Subscription']->updatedAt = $braintreeSubscription->updatedAt->format($format);
+        $data['Subscription']->firstBillingDate = $braintreeSubscription->firstBillingDate->format($format);
+        $data['Subscription']->nextBillingDate = $braintreeSubscription->nextBillingDate->format($format);
+        
+
+        return view('subscription.show', $data);
     }
 
     /**

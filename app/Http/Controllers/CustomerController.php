@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Providers\AppServiceProvider;
 use App\Customer;
+use App\Subscription;
 Use Braintree;
 use Auth;
 use Session;
@@ -90,7 +91,7 @@ class CustomerController extends Controller
     {
         /** create gateway */
         $gateway = app()->make('Gateway');
-        /** check if user is already a customer */
+        /** check if user is a customer */
         $myCustomer = Customer::where(['user_id'=>Auth::user()->id]);
         if ( !$myCustomer->exists() ){ 
             return Redirect::to('customer/create');
@@ -99,8 +100,13 @@ class CustomerController extends Controller
         $myCustomer = $myCustomer->first();
         /** get braintree customer */
         $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
+        /** get subscriptions */
+        $subscriptions = Subscription::where(['customer_id'=>$myCustomer->id])->get();
+     
         $data['myCustomer'] = $myCustomer;
         $data['braintreeCustomer'] = $braintreeCustomer;
+        $data['subscriptions'] = $subscriptions;
+
         return view('customer.show', $data);
     }
 
