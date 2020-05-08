@@ -19,6 +19,7 @@ class SubscriptionController extends Controller
      */
     public function index()
     {
+        /** check if user is a customer */
         $customer = Customer::where(['user_id' => Auth::user()->id])->exists();
         if ($customer) {
             $subscriptions = Subscription::where(['customer_id' => $customer['id']])->exists();
@@ -39,9 +40,10 @@ class SubscriptionController extends Controller
      */
     public function create()
     {
-        //
+        /** check if user is a customer */
         $customer = Customer::where(['user_id' => Auth::user()->id])->exists();
         if ($customer) {
+            /** check if user is already subscribed */
             $subscription = Subscription::where(['customer_id' => $customer['id']])->exists();
             if ($subscription) {
                 Session::flash('message', 'You are already subbcribed.'); 
@@ -62,13 +64,23 @@ class SubscriptionController extends Controller
      */
     public function store(Request $request)
     {
+        /** create gateway */
         $gateway = app()->make('Gateway');
-        $myCustomer = Customer::where([ 'user_id' => Auth::user()->id])->first();
+        /** check if user is a customer */
+        $mycustomer = Customer::where(['user_id' => Auth::user()->id]);
+        if( !$myCustomer->exists() ){
+            return Redirect::view('customer.create');
+        }
+        /** get our customer */
+        $mycustomer = $myCustomer->first();
+        /** get braintree customer */
         $braintreeCustomer = $gateway->customer()->find($myCustomer['braintree_id']);
+        /** create subscription */
         $res = $gateway->subscription()->create([
             'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
             'planId' => $request->get('planId')
         ]);
+        /** return */
         if ($res->success) {
             $braintreeSubscription = $res->subscription;
             Subscription::create([
@@ -93,20 +105,40 @@ class SubscriptionController extends Controller
      */
     public function show($id)
     {
-        
+        /** check if subscription exists */
         $mySubscription = Subscription::find($id);
+        if( !$mySubscription ){
+            return view('errors.404');
+        }
+        /** check if user is a customer */
+        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
+        if( !$myCustomer->exists() ){
+            return Redirect::view('customer.create');
+        }
+        /** get our customer */
+        $myCustomer = $myCustomer->first();
+        /** create gateway */
         $gateway = app()->make('Gateway');
+        /** check if subscription belongs to logged in customer */
+        if ( !$mySubscription->customer_id == $myCustomer->id ){
+            /** this is returning not found if the logged in customer isn't the subscription owner,
+             *  i'm not sure if this would make a security concern but better be safe than sorry. */
+            return view('errors.404');
+        }
+        /** get braintree subscription */
         $braintreeSubscription = $gateway->subscription()->find($mySubscription['braintree_id']);
-        $format = 'd/m/Y';
-
+        /** this is the date format i chose, you can chose what ever format you want,
+         *  but you have to format the date or it'll error out.
+         */
+        $format = 'd/m/Y'; 
 
         $data['Subscription'] = $braintreeSubscription;
+        /** formating the dates  */
         $data['Subscription']->createdAt = $braintreeSubscription->createdAt->format($format);
         $data['Subscription']->updatedAt = $braintreeSubscription->updatedAt->format($format);
         $data['Subscription']->firstBillingDate = $braintreeSubscription->firstBillingDate->format($format);
         $data['Subscription']->nextBillingDate = $braintreeSubscription->nextBillingDate->format($format);
         
-
         return view('subscription.show', $data);
     }
 
@@ -139,8 +171,18 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Subscription $subscription)
+    public function cancel($id)
     {
-        //
+        /** create gateway */
+        $gateway = app()->make('Gateway');
+        /** cancel subscription */
+        $result = $gateway->subscription()->cancel($id);
+
+        if ( $result->success ){
+            Session::flash('message', 'Your subscription has been cancled, sad to see you go :(.'); 
+            return Redirect::to('home');
+        }else{
+            return "Something went wrong...";
+        }
     }
 }
