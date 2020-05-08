@@ -8,6 +8,7 @@ use App\Customer;
 use Auth;
 use Session;
 use Braintree;
+use Redirect;
 class SubscriptionController extends Controller
 {
     /**
@@ -63,13 +64,18 @@ class SubscriptionController extends Controller
         $gateway = app()->make('Gateway');
         $myCustomer = Customer::where([ 'user_id' => Auth::user()->id])->first();
         $braintreeCustomer = $gateway->customer()->find($myCustomer['braintree_id']);
-
         $res = $gateway->subscription()->create([
             'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
             'planId' => $request->get('planId')
         ]);
-        dd($res->subscription);
         if ($res->success) {
+            $braintreeSubscription = $res->subscription;
+            Subscription::create([
+                'paymentMethodToken' => $braintreeSubscription->paymentMethodToken,
+                'planId' => $braintreeSubscription->planId,
+                'braintree_id' => $braintreeSubscription->id,
+                'customer_id' => (int) $myCustomer->id,
+            ]);
             Session::flash('message', 'Subscription created Successfully, check your dashboard for more info.'); 
             return Redirect::to('home');
         }else{

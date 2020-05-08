@@ -16,8 +16,8 @@ class CreateSubscriptionsTable extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('planId');
-            $table->string('paymentMethods');
-            $table->integer('braintree_id');
+            $table->string('paymentMethodToken');
+            $table->string('braintree_id');
             $table->bigInteger('customer_id')->unsigned();
             $table->foreign('customer_id')->references('id')->on('customers')
                 ->onDelete('cascade')->onUpdate('cascade');

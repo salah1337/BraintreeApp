@@ -13,7 +13,7 @@ $factory->define(Subscription::class, function (Faker $faker) {
 
     return [
         'planId' => $faker->randomElement(['monthly_plan','bi_yearly_plan','yearly_plan']),
-        'paymentMethods' => Str::random(8),
+        'paymentMethodToken' => Str::random(8),
         'braintree_id' =>'22',
         'customer_id' => $randomCustomer->id,
     ];
