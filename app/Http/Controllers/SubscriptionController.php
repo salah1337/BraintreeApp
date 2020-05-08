@@ -40,11 +40,12 @@ class SubscriptionController extends Controller
      */
     public function create()
     {
+        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
         /** check if user is a customer */
-        $customer = Customer::where(['user_id' => Auth::user()->id])->exists();
-        if ($customer) {
+        if ( $myCustomer->exists() ) {
+            $myCustomer = $myCustomer->first();
             /** check if user is already subscribed */
-            $subscription = Subscription::where(['customer_id' => $customer['id']])->exists();
+            $subscription = Subscription::where(['customer_id' => $myCustomer->id, 'status' => 'active'])->exists();
             if ($subscription) {
                 Session::flash('message', 'You are already subbcribed.'); 
                 return Redirect::to('home');
@@ -54,6 +55,7 @@ class SubscriptionController extends Controller
         }else{
             return Redirect::to('customer/create');
         }
+        return "Something went wrong.";
     }
 
     /**
@@ -67,7 +69,7 @@ class SubscriptionController extends Controller
         /** create gateway */
         $gateway = app()->make('Gateway');
         /** check if user is a customer */
-        $mycustomer = Customer::where(['user_id' => Auth::user()->id]);
+        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
         if( !$myCustomer->exists() ){
             return Redirect::view('customer.create');
         }
@@ -80,15 +82,18 @@ class SubscriptionController extends Controller
             'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
             'planId' => $request->get('planId')
         ]);
-        /** return */
+        /** check if if was successful */
         if ($res->success) {
             $braintreeSubscription = $res->subscription;
+            /** create subscription to save on our own database */
             Subscription::create([
                 'paymentMethodToken' => $braintreeSubscription->paymentMethodToken,
                 'planId' => $braintreeSubscription->planId,
                 'braintree_id' => $braintreeSubscription->id,
+                'status' => $braintreeSubscription->status,
                 'customer_id' => $myCustomer->id,
             ]);
+            /** return */
             Session::flash('message', 'Subscription created Successfully, check your dashboard for more info.'); 
             return Redirect::to('home');
         }else{
@@ -127,9 +132,7 @@ class SubscriptionController extends Controller
         }
         /** get braintree subscription */
         $braintreeSubscription = $gateway->subscription()->find($mySubscription['braintree_id']);
-        /** this is the date format i chose, you can chose what ever format you want,
-         *  but you have to format the date or it'll error out.
-         */
+        /** chosing date format */
         $format = 'd/m/Y'; 
 
         $data['Subscription'] = $braintreeSubscription;
@@ -175,9 +178,10 @@ class SubscriptionController extends Controller
     {
         /** create gateway */
         $gateway = app()->make('Gateway');
+
+        $braintreeSubscription = $gateway->subscription()->find($mySubscription['braintree_id']);
         /** cancel subscription */
         $result = $gateway->subscription()->cancel($id);
-
         if ( $result->success ){
             Session::flash('message', 'Your subscription has been cancled, sad to see you go :(.'); 
             return Redirect::to('home');

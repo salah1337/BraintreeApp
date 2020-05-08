@@ -18,6 +18,7 @@ class CreateSubscriptionsTable extends Migration
             $table->string('planId');
             $table->string('paymentMethodToken');
             $table->string('braintree_id');
+            $table->string('status');
             $table->bigInteger('customer_id')->unsigned();
             $table->foreign('customer_id')->references('id')->on('customers')
                 ->onDelete('cascade')->onUpdate('cascade');

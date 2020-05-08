@@ -16,5 +16,6 @@ $factory->define(Subscription::class, function (Faker $faker) {
         'paymentMethodToken' => Str::random(8),
         'braintree_id' =>'22',
         'customer_id' => $randomCustomer->id,
+        'status' => $faker->randomElement(['active','canceled','pending']),
     ];
 });
