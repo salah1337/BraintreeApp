@@ -151,9 +151,10 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function edit(Subscription $subscription)
+    public function edit($id)
     {
-        //
+        $subscription = Subscription::find($id);
+        return view('subscription.edit', $subscription);
     }
 
     /**
@@ -163,9 +164,37 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Subscription $subscription)
+    public function update($id, Request $request)
     {
-        //
+        $subscription = Subscription::find($id);
+        $gateway = app()->make('Gateway');
+        $result = $gateway->subscription()->update($subscription->braintree_id, [
+            'planId' => $request->get('planId'),
+        ]);
+        Subscription::where(['id' => $id])->update([
+            'planId' => $request->get('planId')
+        ]);
+        return $result;
+
+        /** This is what this returned
+         * 
+         * {
+        *   "errors": [
+        *     {
+        *  
+        *     }
+        *   ],
+        *   "params": {
+        *     "planId": "yearly_plan"
+        *   },
+        *   "message": "Cannot update subscription to a plan with a different billing frequency.",
+        *   "creditCardVerification": null,
+        *   "transaction": null,
+        *   "subscription": null,
+        *   "merchantAccount": null,
+        *   "verification": null
+        * }
+         */
     }
 
     /**

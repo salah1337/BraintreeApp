@@ -33,6 +33,8 @@ Route::prefix('/customer')->group( function(){
 Route::prefix('/subscription')->group( function(){
     Route::get('/create', 'SubscriptionController@create')->middleware('auth');
     Route::post('/create', 'SubscriptionController@store')->middleware('auth');
+    Route::get('/edit/{id}', 'SubscriptionController@edit')->middleware('auth');
+    Route::patch('/update/{id}', 'SubscriptionController@update')->middleware('auth');
     Route::get('/show/{id}', 'SubscriptionController@show')->middleware('auth');
     Route::get('/cancel/{id}', 'SubscriptionController@cancel')->middleware('auth');
 });
