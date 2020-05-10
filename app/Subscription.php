@@ -32,4 +32,8 @@ class Subscription extends Model
     protected $casts = [
         
     ];
+    public function customer()
+    {
+        return $this->belongsTo('App\Customer');
+    }
 }

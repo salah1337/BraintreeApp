@@ -32,5 +32,14 @@ class Customer extends Model
      */
     protected $casts = [
         
-    ];
+    ];    
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
+    public function subscriptions()
+    {
+        return $this->hasMany('App\Subscription');
+    }
+
 }

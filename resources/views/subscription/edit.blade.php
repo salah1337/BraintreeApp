@@ -2,30 +2,48 @@
 
 @section('content')
 
-<form method="POST" action="/subscription/update/{{ $id }}" class="container">
-    {{ csrf_field() }}
-    <input type="hidden" name="_method" value="patch" />
-    <div class="form-group">
-    <h4>You currently have the <span id="planId">{{ $planId }}</span></h4>
-      <label for="plansSelect">Plan</label>
-      <select name="planId" id="plansSelect">
-        <option value="monthly_plan">1 month</option>
-        <option value="bi_yearly_plan">6 months</option>
-        <option value="yearly_plan">12 months</option>
-      </select>
+<div class="container">
+    <div class="row">
+    <p style="display: none" id="planId">{{ $planId }}</p>
+      <div id="monthly_plan" class="plans col-sm">
+        <h3>
+          1 Month 
+        </h3>
+        <p>
+          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Inventore, quam?
+        </p>
+        <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/monthly_plan">Subscribe</a></button>
+      </div>
+      <div id="bi_yearly_plan" class="plans col-sm">
+        <h3>
+          6 Months
+        </h3>
+        <p>
+          Save 5$, sit amet consectetur adipisicing elit. Inventore, quam?
+        </p>
+        <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/bi_yearly_plan">Subscribe</a></button>
+      </div>
+      <div id="yearly_plan" class="plans col-sm">
+        <h3>
+          12 Months
+        </h3>
+        <p>
+          Save 10$, sit amet consectetur adipisicing elit. Inventore, quam?
+        </p>
+        <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/yearly_plan">Subscribe</a></button>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary">Sub</button>
-</form>
+  </div>
 
 @endsection
 
 @section('js')
     <script>
-        var planId = document.querySelector('#planId').innerHTML;
-        document.querySelectorAll('option').forEach(opt => {
-            if ( opt.value === planId ){
-                opt.disabled = true
-            }
+        var planId = document.getElementById('planId').innerHTML;
+        document.querySelectorAll('.plans').forEach(plan => {
+            if ( plan.getAttribute('id') === planId ){
+                plan.style.display = 'none';
+            };
         });
     </script>
 @endsection

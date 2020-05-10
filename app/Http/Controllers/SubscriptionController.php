@@ -64,7 +64,7 @@ class SubscriptionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store($planId)
     {
         /** create gateway */
         $gateway = app()->make('Gateway');
@@ -80,7 +80,7 @@ class SubscriptionController extends Controller
         /** create subscription */
         $res = $gateway->subscription()->create([
             'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
-            'planId' => $request->get('planId')
+            'planId' => $planId
         ]);
         /** check if if was successful */
         if ($res->success) {
@@ -154,6 +154,8 @@ class SubscriptionController extends Controller
     public function edit($id)
     {
         $subscription = Subscription::find($id);
+        $this->authorize('edit-subscription', Auth::user(), $subscription);
+        
         return view('subscription.edit', $subscription);
     }
 
@@ -167,6 +169,7 @@ class SubscriptionController extends Controller
     public function update($id, Request $request)
     {
         $subscription = Subscription::find($id);
+        $this->authorize('edit-subscription', Auth::user(), $subscription);
         $gateway = app()->make('Gateway');
         $result = $gateway->subscription()->update($subscription->braintree_id, [
             'planId' => $request->get('planId'),
@@ -175,26 +178,6 @@ class SubscriptionController extends Controller
             'planId' => $request->get('planId')
         ]);
         return $result;
-
-        /** This is what this returned
-         * 
-         * {
-        *   "errors": [
-        *     {
-        *  
-        *     }
-        *   ],
-        *   "params": {
-        *     "planId": "yearly_plan"
-        *   },
-        *   "message": "Cannot update subscription to a plan with a different billing frequency.",
-        *   "creditCardVerification": null,
-        *   "transaction": null,
-        *   "subscription": null,
-        *   "merchantAccount": null,
-        *   "verification": null
-        * }
-         */
     }
 
     /**
@@ -220,11 +203,8 @@ class SubscriptionController extends Controller
         /** create gateway */
         $gateway = app()->make('Gateway');
         /** check if subscription belongs to logged in customer */
-        if ( $mySubscription->customer_id !== $myCustomer->id ){
-            /** this is returning not found if the logged in customer isn't the subscription owner,
-             *  i'm not sure if this would make a security concern but better be safe than sorry. */
-            return view('errors.404');
-        }
+        $this->authorize('edit-subscription', Auth::user(), $subscription);
+
         /** cancel subscription */
         $result = $gateway->subscription()->cancel($mySubscription->braintree_id);
 

@@ -2,17 +2,37 @@
 
 @section('content')
 
-<form method="POST" action="/subscription/create" class="container">
-    {{ csrf_field() }}
-    <div class="form-group">
-      <label for="plansSelect">Plan</label>
-      <select name="planId" id="plansSelect">
-        <option value="monthly_plan">1 month</option>
-        <option value="bi_yearly_plan">6 months</option>
-        <option value="yearly_plan">12 months</option>
-      </select>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <h3>
+            1 Month 
+          </h3>
+          <p>
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Inventore, quam?
+          </p>
+          <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/monthly_plan">Subscribe</a></button>
+        </div>
+        <div class="col-sm">
+          <h3>
+            6 Months
+          </h3>
+          <p>
+            Save 5$, sit amet consectetur adipisicing elit. Inventore, quam?
+          </p>
+          <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/bi_yearly_plan">Subscribe</a></button>
+        </div>
+        <div class="col-sm">
+          <h3>
+            12 Months
+          </h3>
+          <p>
+            Save 10$, sit amet consectetur adipisicing elit. Inventore, quam?
+          </p>
+          <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/yearly_plan">Subscribe</a></button>
+        </div>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary">Sub</button>
-</form>
+
 
 @endsection
