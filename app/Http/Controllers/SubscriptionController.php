@@ -171,16 +171,15 @@ class SubscriptionController extends Controller
     {
         /** get customer & subscription */
         $subscription = Subscription::find($id);
-        $customer = Auth::user()->customer();
-        dd($customer);
         /** check if allowed to edit */
-
+        $this->authorize('edit-subscription', Auth::user(), $subscription);
         /** make new subscription */
-
+        
         /** cancel old one */
-
-
-
+        
+        
+        
+        $customer = Auth::user()->customer;
 
 
 
