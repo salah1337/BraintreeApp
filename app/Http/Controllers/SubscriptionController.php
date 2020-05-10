@@ -154,6 +154,7 @@ class SubscriptionController extends Controller
     public function edit($id)
     {
         $subscription = Subscription::find($id);
+
         $this->authorize('edit-subscription', Auth::user(), $subscription);
         
         return view('subscription.edit', $subscription);
@@ -166,17 +167,32 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function update($id, Request $request)
+    public function update($id, $planId)
     {
+        /** get customer & subscription */
         $subscription = Subscription::find($id);
+        $customer = Auth::user()->customer();
+        dd($customer);
+        /** check if allowed to edit */
+
+        /** make new subscription */
+
+        /** cancel old one */
+
+
+
+
+
+
         $this->authorize('edit-subscription', Auth::user(), $subscription);
         $gateway = app()->make('Gateway');
-        $result = $gateway->subscription()->update($subscription->braintree_id, [
-            'planId' => $request->get('planId'),
+        /** get old subscription */
+        $braintreeSubscription = $gateway->subscription()->find($subscription->braintree_id);
+        /** make new subscription */
+        $gateway->subscription()->create([
+            
         ]);
-        Subscription::where(['id' => $id])->update([
-            'planId' => $request->get('planId')
-        ]);
+        
         return $result;
     }
 
@@ -203,7 +219,7 @@ class SubscriptionController extends Controller
         /** create gateway */
         $gateway = app()->make('Gateway');
         /** check if subscription belongs to logged in customer */
-        $this->authorize('edit-subscription', Auth::user(), $subscription);
+        $this->authorize('edit-subscription', Auth::user(), $mySubscription);
 
         /** cancel subscription */
         $result = $gateway->subscription()->cancel($mySubscription->braintree_id);

@@ -27,7 +27,7 @@ class AuthServiceProvider extends ServiceProvider
 
         //
         Gate::define('edit-subscription', function( $user,  $subscription) {
-             return $subscription->customer() === $user->customer();
+             return $subscription->customer === $user->customer;
         });
     }
 }
