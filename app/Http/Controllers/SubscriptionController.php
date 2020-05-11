@@ -101,7 +101,6 @@ class SubscriptionController extends Controller
         }
         return "Something went wrong.";
     }
-
     /**
      * Display the specified resource.
      *
@@ -169,30 +168,39 @@ class SubscriptionController extends Controller
      */
     public function update($id, $planId)
     {
-        /** get customer & subscription */
+        /** get user & subscription */
         $subscription = Subscription::find($id);
-        /** check if allowed to edit */
-        $this->authorize('edit-subscription', Auth::user(), $subscription);
+        $user = Auth::user();
+        /** check if user is allowed to edit */
+        $this->authorize('edit-subscription', $user, $subscription);
         /** make new subscription */
-        
-        /** cancel old one */
-        
-        
-        
-        $customer = Auth::user()->customer;
-
-
-
-        $this->authorize('edit-subscription', Auth::user(), $subscription);
         $gateway = app()->make('Gateway');
-        /** get old subscription */
-        $braintreeSubscription = $gateway->subscription()->find($subscription->braintree_id);
-        /** make new subscription */
-        $gateway->subscription()->create([
-            
+        /** get old subscription from braintree */
+        $oldSubscription = $gateway->subscription()->find($subscription->braintree_id);
+        /** get customer */
+        $myCustomer = $user->customer;
+        $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
+        /** */
+        $res = $gateway->subscription()->create([
+            'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
+            'planId' => $planId,
+            'firstBillingDate' => $oldSubscription->nextBillingDate
+        ]);
+        $newSubscription = $res->subscription;
+        /** cancel old one */
+        $gateway->subscription()->update($oldSubscription->id, [
+            'numberOfBillingCycles' => 1,
+        ]);
+        Subscription::create([
+            'paymentMethodToken' => $newSubscription->paymentMethodToken,
+            'planId' => $newSubscription->planId,
+            'braintree_id' => $newSubscription->id,
+            'status' => $newSubscription->status,
+            'customer_id' => $myCustomer->id,
         ]);
         
-        return $result;
+        Session::flash('message', 'Donezo'); 
+        return Redirect::to('home');
     }
 
     /**

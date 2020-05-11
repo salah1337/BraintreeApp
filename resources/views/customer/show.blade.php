@@ -24,18 +24,31 @@
     @endforeach
     <br/>
     <br/>
-    @if ($subscription)
+    @if ($activeSubscription)
         <h4>
             Active Subscription:
         </h4>
         <h5>
-            Plan: {{ $subscription->planId }}
+            Plan: {{ $activeSubscription->planId }}
             <br/>
-            Created at: {{ substr($subscription->created_at, 0, 10) }}
+            Created at: {{ substr($activeSubscription->created_at, 0, 10) }}
             <br/>
-            <a href="/subscription/show/{{$subscription->id}}">More</a>
+            <a href="/subscription/show/{{$activeSubscription->id}}">More</a>
             <br/>
         </h5>
+        @if ($pendingSubscription)
+            <h5>
+                Pending Subscription:
+            </h5>
+            <h6>
+                Plan: {{ $pendingSubscription->planId }}
+                <br/>
+                Created at: {{ substr($pendingSubscription->created_at, 0, 10) }}
+                <br/>
+                <a href="/subscription/show/{{$pendingSubscription->id}}">More</a>
+                <br/>
+            </h6>
+        @endif
     @else
         You have no active subscriptions.
         <br/>

@@ -101,11 +101,13 @@ class CustomerController extends Controller
         /** get braintree customer */
         $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
         /** get active subscription */
-        $subscription = Subscription::where(['customer_id' => $myCustomer->id, 'status' => 'Active'])->first();
+        $activeSubscription = Subscription::where(['customer_id' => $myCustomer->id, 'status' => 'Active'])->first();
+        $pendingSubscription = Subscription::where(['customer_id' => $myCustomer->id, 'status' => 'Pending'])->first();
      
         $data['myCustomer'] = $myCustomer;
         $data['braintreeCustomer'] = $braintreeCustomer;
-        $data['subscription'] = $subscription;
+        $data['activeSubscription'] = $activeSubscription;
+        $data['pendingSubscription'] = $pendingSubscription;
 
         return view('customer.show', $data);
     }
