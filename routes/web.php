@@ -37,4 +37,6 @@ Route::prefix('/subscription')->group( function(){
     Route::get('/update/{id}/{planId}', 'SubscriptionController@update')->middleware('auth');
     Route::get('/show/{id}', 'SubscriptionController@show')->middleware('auth');
     Route::get('/cancel/{id}', 'SubscriptionController@cancel')->middleware('auth');
+    Route::get('/startnow/{id}', 'SubscriptionManagmentController@startNow')->middleware('auth');
 });
+Route::get('/subscription/all', 'SubscriptionController@all')->middleware('auth');

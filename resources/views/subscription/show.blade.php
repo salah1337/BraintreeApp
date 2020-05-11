@@ -34,6 +34,7 @@
             @case("Pending")
                     Subscription is pending untill {{ $Subscription->firstBillingDate }}.
                     <br/>
+                    <a class="btn btn-success" href="/subscription/startnow/{{ $mySubscription->id }}">Start Now</a>
                     <a class="btn btn-danger" href="/subscription/cancel/{{ $mySubscription->id }}">Cancel</a>
                     <a class="btn btn-primary" href="{{ URL::previous() }}">Back</a>
                 @break

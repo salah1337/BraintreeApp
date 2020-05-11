@@ -36,7 +36,12 @@
             <a href="/subscription/show/{{$activeSubscription->id}}">More</a>
             <br/>
         </h5>
-        @if ($pendingSubscription)
+    @else
+        You have no active subscriptions.
+        <br/>
+        <a href="/subscription/create" class="btn btn-success">Subscribe</a>
+    @endif
+    @if ($pendingSubscription)
             <h5>
                 Pending Subscription:
             </h5>
@@ -48,14 +53,9 @@
                 <a href="/subscription/show/{{$pendingSubscription->id}}">More</a>
                 <br/>
             </h6>
-        @endif
-    @else
-        You have no active subscriptions.
-        <br/>
-        <a href="/subscription/create" class="btn btn-success">Subscribe</a>
     @endif
         <br/>
-        <a href="/subscription/show/all">See subscription history</a>
+        <a href="/subscription/all">See subscription history</a>
         <br/>
 </div>
 

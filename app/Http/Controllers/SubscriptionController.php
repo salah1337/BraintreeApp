@@ -32,7 +32,9 @@ class SubscriptionController extends Controller
             return view('/customer/create');
         }
     }
-
+    public function all(){
+        return Auth::user()->customer->subscriptions;
+    }
     /**
      * Show the form for creating a new resource.
      *

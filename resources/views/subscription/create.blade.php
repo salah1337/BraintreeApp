@@ -31,6 +31,15 @@
           </p>
           <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/yearly_plan">Subscribe</a></button>
         </div>
+        <div class="col-sm">
+          <h3>
+            E
+          </h3>
+          <p>
+            Save 10$, sit amet consectetur adipisicing elit. Inventore, quam?
+          </p>
+          <button class="btn btn-primary"><a class="text text-white" href="/subscription/store/eee">Subscribe</a></button>
+        </div>
       </div>
     </div>
 

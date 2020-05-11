@@ -26,8 +26,11 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         //
-        Gate::define('edit-subscription', function( $user,  $subscription) {
+        Gate::define('edit-subscription', function($user, $subscription) {
              return $subscription->customer === $user->customer;
+        });
+        Gate::define('is-subbed', function($user) {
+            return $user->customer->subscriptions->where('status', 'Active');
         });
     }
 }
