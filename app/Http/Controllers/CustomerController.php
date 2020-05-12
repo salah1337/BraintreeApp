@@ -87,29 +87,22 @@ class CustomerController extends Controller
      */
     public function show()
     {
+        /** check if user is a customer */
+        if (Gate::denies('is-customer', Auth::user())) {
+            return view('customer.create');
+        }
         /** create gateway */
         $gateway = app()->make('Gateway');
-        /** check if user is a customer */
-        $myCustomer = Customer::where(['user_id'=>Auth::user()->id]);
-        if ( !$myCustomer->exists() ){ 
-            return Redirect::to('customer/create');
-        }
         /** get our customer */
-        $myCustomer = $myCustomer->first();
+        $data['myCustomer'] = Auth::user()->customer;
         /** get braintree customer */
-        $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
-        /** get active subscription */
-        $activeSubscription = Subscription::where(['customer_id' => $myCustomer->id, 'status' => 'Active'])->first();
-        $pendingSubscription = Subscription::where(['customer_id' => $myCustomer->id, 'status' => 'Pending'])->first();
-     
-        $data['myCustomer'] = $myCustomer;
-        $data['braintreeCustomer'] = $braintreeCustomer;
-        $data['activeSubscription'] = $activeSubscription;
-        $data['pendingSubscription'] = $pendingSubscription;
-
-        return $data;
+        $data['braintreeCustomer'] = $gateway->customer()->find($data['myCustomer']->braintree_id);
+        /** get subscriptions */
+        $data['activeSubscription'] = $data['myCustomer']->subscriptions->where('status', 'Active')->first();
+        $data['pendingSubscription'] = $data['myCustomer']->subscriptions->where('status', 'Pending')->first();
+        /** return */
+        return view('customer.show', $data);
     }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -118,14 +111,13 @@ class CustomerController extends Controller
      */
     public function edit()
     {
-        $myCustomer = Customer::where(['user_id'=>Auth::user()->id]);
-        /** check if user is not a customer */
-        if ( !$myCustomer->exists() ) {
+        /** check if user is a customer */
+        if (Gate::denies('is-customer', Auth::user())) {
             return view('customer.create');
         }
-        $data = $myCustomer->first();
+        $data = Auth::user()->customer;
 
-        return $data;
+        return view('customer.edit', $data);
         
     }
 
@@ -138,15 +130,13 @@ class CustomerController extends Controller
      */
     public function update(Request $request)
     {
-        /** create gateway */
-        $gateway = app()->make('Gateway');
-        $myCustomer = Customer::where(['user_id'=>Auth::user()->id]);
-        /** check if user is not a customer */
-        if ( !$myCustomer->exists() ) {
+        if (Gate::denies('is-customer', Auth::user())) {
             return view('customer.create');
         }
+        /** create gateway */
+        $gateway = app()->make('Gateway');
         /** get our customer */
-        $myCustomer = $myCustomer->first();
+        $myCustomer = Auth::user()->customer;
         /** get braintree customer */
         $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
         /** update braintree customer */
@@ -168,11 +158,11 @@ class CustomerController extends Controller
         ]);
  
         if ($updatedBraintreeCustomer->success) {
-            return True;
+            return Redirect::to('customer.show');
         } else{
-            return False;
+            return "oopsie woopsie";
         }
-        return False;
+        return "oopsie woopsie";
     }
 
     /**
@@ -183,24 +173,23 @@ class CustomerController extends Controller
      */
     public function destroy()
     {
-        /** create gateway */
-        $gateway = app()->make('Gateway');
-        $myCustomer = Customer::where(['user_id'=>Auth::user()->id]);
-        /** check if user is not a customer */
-        if ( !$myCustomer->exists() ) {
+        if (Gate::denies('is-customer', Auth::user())) {
             return view('customer.create');
         }
+        /** create gateway */
+        $gateway = app()->make('Gateway');
         /** get our customer */
-        $myCustomer = $myCustomer->first();
+        $myCustomer = Auth::user()->customer;
         /** delete braintree customer */
         $result = $gateway->customer()->delete($myCustomer->braintree_id);
         /** delete our customer */
         $myCustomer->delete();
         if ($result->success) {
-            return True;
+            Session::flash('message', 'Customer deleted.'); 
+            return Redirect::to('home');
         } else{
-            return False;
+            return "oopsie woopsie";
         }
-        return False;
+        return "oopsie woopsie";
     }
 }

@@ -13,15 +13,29 @@
     
     Member since {{ substr($myCustomer->created_at, 0, 10) }}
     <br/>
+    <br/>
+    @if ($braintreeCustomer->creditCards)
     Credit cards: <br/>
-    @foreach ($braintreeCustomer->creditCards as $card)
+        @foreach ($braintreeCustomer->creditCards as $card)
         {{ $card->cardType }}
         <br/>
         Expiration date: {{ $card->expirationDate }}
         <br/>
         ****{{ $card->last4 }}
         <br/>
-    @endforeach
+        @endforeach
+    @endif
+    @if ($braintreeCustomer->paypalAccounts)
+    Paypal Accounts: <br/>
+        @foreach ($braintreeCustomer->paypalAccounts as $account)
+        {{ $account->email }}
+        <br/>
+        <img src="{{ $account->imageUrl }}" alt="">
+        <br/>
+        <br/>
+        @endforeach
+    @endif
+
     <br/>
     <br/>
     @if ($activeSubscription)
@@ -56,6 +70,9 @@
     @endif
         <br/>
         <a href="/subscription/all">See subscription history</a>
+        <br/>
+        <br/>
+        <a class="btn btn-danger" href="/customer/delete">Delete Customer</a>
         <br/>
 </div>
 
