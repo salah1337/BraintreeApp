@@ -147,8 +147,15 @@ class SubscriptionController extends Controller
      */
     public function edit($id)
     {
+        $user = Auth::user();
+        /** check if user is a customer */
+        $this->authorize('is-customer', $user);
+        /** check if subscription exists */
         $subscription = Subscription::find($id);
-
+        if( !$subscription ){
+            return 404;
+        }
+        /** check if subscription belongs to user */
         $this->authorize('edit-subscription', Auth::user(), $subscription);
         
         return view('subscription.edit', $subscription);
@@ -161,31 +168,32 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function update($id, $planId)
+    public function switch($id, $planId)
     {
         /** get user & subscription */
-        $subscription = Subscription::find($id);
+        $mySubscription = Subscription::find($id);
         $user = Auth::user();
         /** check if user is allowed to edit */
-        $this->authorize('edit-subscription', $user, $subscription);
+        $this->authorize('edit-subscription', $user, $mySubscription);
         /** make new subscription */
         $gateway = app()->make('Gateway');
         /** get old subscription from braintree */
-        $oldSubscription = $gateway->subscription()->find($subscription->braintree_id);
+        $oldSubscription = $gateway->subscription()->find($mySubscription->braintree_id);
         /** get customer */
         $myCustomer = $user->customer;
         $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
-        /** */
+        /** make subscription that starts when old one ends */
         $res = $gateway->subscription()->create([
             'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
             'planId' => $planId,
             'firstBillingDate' => $oldSubscription->nextBillingDate
         ]);
         $newSubscription = $res->subscription;
-        /** cancel old one */
+        /** make last one end this month */
         $gateway->subscription()->update($oldSubscription->id, [
             'numberOfBillingCycles' => 1,
         ]);
+        /** save new subscription details in our db */
         Subscription::create([
             'paymentMethodToken' => $newSubscription->paymentMethodToken,
             'planId' => $newSubscription->planId,
@@ -193,7 +201,7 @@ class SubscriptionController extends Controller
             'status' => $newSubscription->status,
             'customer_id' => $myCustomer->id,
         ]);
-        
+        /** victory! */
         Session::flash('message', 'Donezo'); 
         return Redirect::to('home');
     }
@@ -206,23 +214,20 @@ class SubscriptionController extends Controller
      */
     public function cancel($id)
     {
+        $user = Auth::user();
+        /** check if user is a customer */
+        $this->authorize('is-customer', $user);
         /** check if subscription exists */
         $mySubscription = Subscription::find($id);
         if( !$mySubscription ){
             return view('errors.404');
         }
-        /** check if user is a customer */
-        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
-        if( !$myCustomer->exists() ){
-            return Redirect::view('customer.create');
-        }
+        /** check if subscription belongs to logged in user */
+        $this->authorize('edit-subscription', $user, $mySubscription);
         /** get our customer */
-        $myCustomer = $myCustomer->first();
+        $myCustomer = $user->customer;
         /** create gateway */
         $gateway = app()->make('Gateway');
-        /** check if subscription belongs to logged in customer */
-        $this->authorize('edit-subscription', Auth::user(), $mySubscription);
-
         /** cancel subscription */
         $result = $gateway->subscription()->cancel($mySubscription->braintree_id);
 
@@ -235,5 +240,6 @@ class SubscriptionController extends Controller
         }else{
             return "Something went wrong...";
         }
+        return "Something went wrong...";
     }
 }
