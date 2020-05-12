@@ -11,6 +11,7 @@ Use Braintree;
 use Auth;
 use Session;
 use Redirect;
+use Gate;
 class CustomerController extends Controller
 {
     /**
@@ -35,11 +36,9 @@ class CustomerController extends Controller
     public function create()
     {
         /** check if user is already a customer */
-        if ( Customer::where(['user_id'=>Auth::user()->id])->exists() ){
-            Session::flash('message', 'You are already a customer!'); 
-            return Redirect::to('home');
+        if (Gate::allows('is-customer', Auth::user())) {
+            return view('customer.show', Auth::user()->customer);
         }
-
         return view('customer.create');
     }
     /**
@@ -50,13 +49,12 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        /** check if user is already a customer */
+        if (Gate::allows('is-customer', Auth::user())) {
+            return view('customer.show', Auth::user()->customer);
+        }
         /** create gateway */
         $gateway = app()->make('Gateway');
-        /** check if user is already a customer */
-        if ( Customer::where(['user_id'=>Auth::user()->id])->exists() ){
-            Session::flash('message', 'You are already a customer!'); 
-            return Redirect::to('home');
-        }
         /** create braintree customer */
         $braintreeCustomer = $gateway->customer()->create([
             'firstName' => $request->get('firstName'),
@@ -73,7 +71,7 @@ class CustomerController extends Controller
         ]);
 
         if ($braintreeCustomer->success) {
-            Session::flash('message', 'Customer created succesfully.');
+            Session::flash('message', 'Customer created successfully, check your dashboard for more info!'); 
             return Redirect::to('home');
         } else{
             return "Something went wrong.";
@@ -109,7 +107,7 @@ class CustomerController extends Controller
         $data['activeSubscription'] = $activeSubscription;
         $data['pendingSubscription'] = $pendingSubscription;
 
-        return view('customer.show', $data);
+        return $data;
     }
 
     /**
@@ -127,7 +125,7 @@ class CustomerController extends Controller
         }
         $data = $myCustomer->first();
 
-        return view('customer.edit', $data);
+        return $data;
         
     }
 
@@ -170,12 +168,11 @@ class CustomerController extends Controller
         ]);
  
         if ($updatedBraintreeCustomer->success) {
-            Session::flash('message', 'Customer updated succesfully.');
-            return Redirect::to('home');
+            return True;
         } else{
-            return "Something went wrong.";
+            return False;
         }
-        return "Something went wrong.";
+        return False;
     }
 
     /**
@@ -200,11 +197,10 @@ class CustomerController extends Controller
         /** delete our customer */
         $myCustomer->delete();
         if ($result->success) {
-            Session::flash('message', 'Customer deleted succesfully.');
-            return Redirect::to('home');
+            return True;
         } else{
-            return "Something went wrong.";
+            return False;
         }
-        return "Something went wrong.";
+        return False;
     }
 }

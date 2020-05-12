@@ -4,7 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-
+use Response;
+use App\Customer;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -26,6 +27,9 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         //
+        Gate::define('is-customer', function($user) {
+            return $user->customer;
+        });
         Gate::define('edit-subscription', function($user, $subscription) {
              return $subscription->customer === $user->customer;
         });

@@ -40,7 +40,10 @@
   
   braintree.dropin.create({
   authorization: 'sandbox_q77mfd28_bmsnxb8gpbywh53h',
-  container: '#dropin-container'
+  container: '#dropin-container',
+  paypal: {
+    flow: 'vault'
+  }
   }, function (createErr, instance) {    
     button.addEventListener('click', function () {
         instance.requestPaymentMethod(function (requestPaymentMethodErr, payload) {

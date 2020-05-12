@@ -17,11 +17,38 @@
 
 <script>
     export default {
+        data(){
+            return{
+                firstName: '',
+                lastName: '',
+                nonce: '',
+            }
+        },
         mounted() {
-            console.log('Component mounted.')
+            // let instance = this.loadDropIn();
+
         },
         methods:{
-
+            loadDropIn() {
+                var button = document.querySelector('#submit-button');
+  
+                braintree.dropin.create({
+                authorization: 'sandbox_q77mfd28_bmsnxb8gpbywh53h',
+                container: '#dropin-container'
+                }, function (createErr, instance) {   
+                        return instance;
+                });
+            },
+            requestPayment(instance) {
+                button.addEventListener('click', function () {
+                    instance.requestPaymentMethod(function (requestPaymentMethodErr, payload) {
+                    // Submit payload.nonce to your server
+                    console.log(payload.nonce)
+                    document.querySelector('#nonce').value = payload.nonce;
+                    button.style.display = "none";
+                    });
+                });
+            }
         }
     }
 </script>
