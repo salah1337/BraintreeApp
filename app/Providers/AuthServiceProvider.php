@@ -5,7 +5,7 @@ namespace App\Providers;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Response;
-use App\Customer;
+use Redirect;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -34,7 +34,10 @@ class AuthServiceProvider extends ServiceProvider
              return $subscription->customer === $user->customer;
         });
         Gate::define('is-subbed', function($user) {
-            return $user->customer->subscriptions->where('status', 'Active');
+            return $user->customer->subscriptions->where('status', 'Active')->first();
+        });
+        Gate::define('has-pending-sub', function($user) {
+            return $user->customer->subscriptions->where('status', 'Pending')->first();
         });
     }
 }

@@ -10,6 +10,7 @@ use Session;
 use Braintree;
 use Redirect;
 use DateTime;
+use Gate;
 class SubscriptionController extends Controller
 {
     /**
@@ -42,22 +43,17 @@ class SubscriptionController extends Controller
      */
     public function create()
     {
-        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
-        /** check if user is a customer */
-        if ( $myCustomer->exists() ) {
-            $myCustomer = $myCustomer->first();
-            /** check if user is already subscribed */
-            $subscription = Subscription::where(['customer_id' => $myCustomer->id, 'status' => 'active'])->exists();
-            if ($subscription) {
-                Session::flash('message', 'You are already subbcribed.'); 
-                return Redirect::to('home');
-            }else{
-                return view('/subscription/create');
-            }
-        }else{
+        $user = Auth::user();
+        /** check if user is customer */
+        if (Gate::denies('is-customer', $user)) {
             return Redirect::to('customer/create');
         }
-        return "Something went wrong.";
+        /** check if user already has an active subscription */
+        if (Gate::allows('is-subbed', $user)) {
+            Session::flash('message', 'You are already subbcribed.'); 
+            return Redirect::to('home');
+        }
+        return view('/subscription/create');
     }
 
     /**
@@ -116,26 +112,20 @@ class SubscriptionController extends Controller
         if( !$mySubscription ){
             return view('errors.404');
         }
+        $user = Auth::user();
         /** check if user is a customer */
-        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
-        if( !$myCustomer->exists() ){
-            return Redirect::view('customer.create');
-        }
+        $this->authorize('is-customer', $user);
+        /** check if subscription belongs to logged in customer */
+        $this->authorize('edit-subscription', $user, $mySubscription);
         /** get our customer */
-        $myCustomer = $myCustomer->first();
+        $myCustomer = $user->customer;
         /** create gateway */
         $gateway = app()->make('Gateway');
-        /** check if subscription belongs to logged in customer */
-        if ( $mySubscription->customer_id !== $myCustomer->id ){
-            /** this is returning not found if the logged in customer isn't the subscription owner,
-             *  i'm not sure if this would make a security concern but better be safe than sorry. */
-            return view('errors.404');
-        }
         /** get braintree subscription */
         $braintreeSubscription = $gateway->subscription()->find($mySubscription['braintree_id']);
-        /** chosing date format */
+        /** chose date format */
         $format = 'd/m/Y'; 
-
+        /**  */
         $data['Subscription'] = $braintreeSubscription;
         /** formating the dates  */
         $data['Subscription']->createdAt = $braintreeSubscription->createdAt->format($format);
@@ -143,6 +133,7 @@ class SubscriptionController extends Controller
         $data['Subscription']->firstBillingDate = $braintreeSubscription->firstBillingDate->format($format);
         $data['Subscription']->nextBillingDate = $braintreeSubscription->nextBillingDate->format($format);
         $data['mySubscription'] = $mySubscription;
+        /**  */
         return view('subscription.show', $data);
     }
 

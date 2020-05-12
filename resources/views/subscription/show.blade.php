@@ -23,9 +23,11 @@
                     <a class="btn btn-primary" href="{{ URL::previous() }}">Back</a>
                     <a class="btn btn-danger" href="/subscription/cancel/{{ $mySubscription->id }}">Cancel</a>
                     <br/>
-                    @if (!$Subscription->trialPeriod)
-                        <a class="btn btn-warning" href="/subscription/edit/{{ $mySubscription->id }}">Upgrade / Downgrade</a>
-                    @endif
+                    @cannot('has-pending-sub', Auth::user())
+                        @if (!$Subscription->trialPeriod)
+                            <a class="btn btn-warning" href="/subscription/edit/{{ $mySubscription->id }}">Upgrade / Downgrade</a>
+                        @endif
+                    @endcannot
                 @break
             @case("Canceled")
                     <a class="btn btn-primary" href="{{ URL::previous() }}">Back</a>
@@ -34,7 +36,9 @@
             @case("Pending")
                     Subscription is pending untill {{ $Subscription->firstBillingDate }}.
                     <br/>
-                    <a class="btn btn-success" href="/subscription/startnow/{{ $mySubscription->id }}">Start Now</a>
+                    @cannot('is-subbed', Auth::user())
+                        <a class="btn btn-success" href="/subscription/startnow/{{ $mySubscription->id }}">Start Now</a>
+                    @endcannot
                     <a class="btn btn-danger" href="/subscription/cancel/{{ $mySubscription->id }}">Cancel</a>
                     <a class="btn btn-primary" href="{{ URL::previous() }}">Back</a>
                 @break
