@@ -64,15 +64,17 @@ class SubscriptionController extends Controller
      */
     public function store($planId)
     {
+        $user = Auth::user();
+        /** check if user is a customer */
+        $this->authorize('is-customer', $user);
+        /** check if user has active subscription */
+        if (Gate::allows('is-subbed', $user)) {
+            return 403;
+        }
+        /** get customer */
+        $myCustomer = $user->customer;
         /** create gateway */
         $gateway = app()->make('Gateway');
-        /** check if user is a customer */
-        $myCustomer = Customer::where(['user_id' => Auth::user()->id]);
-        if( !$myCustomer->exists() ){
-            return Redirect::view('customer.create');
-        }
-        /** get our customer */
-        $myCustomer = $myCustomer->first();
         /** get braintree customer */
         $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
         /** create subscription */
@@ -107,15 +109,15 @@ class SubscriptionController extends Controller
      */
     public function show($id)
     {
-        /** check if subscription exists */
-        $mySubscription = Subscription::find($id);
-        if( !$mySubscription ){
-            return view('errors.404');
-        }
         $user = Auth::user();
         /** check if user is a customer */
         $this->authorize('is-customer', $user);
-        /** check if subscription belongs to logged in customer */
+        /** check if subscription exists */
+        $mySubscription = Subscription::find($id);
+        if( !$mySubscription ){
+            return 404;
+        }
+        /** check if subscription belongs to logged in user */
         $this->authorize('edit-subscription', $user, $mySubscription);
         /** get our customer */
         $myCustomer = $user->customer;
