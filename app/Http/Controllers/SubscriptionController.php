@@ -18,24 +18,9 @@ class SubscriptionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function __construct() {
-        $this->middleware('auth');
-        $this->middleware('customer');
-    }
-    public function index()
+    public function __construct()
     {
-        /** check if user is a customer */
-        $customer = Customer::where(['user_id' => Auth::user()->id])->exists();
-        if ($customer) {
-            $subscriptions = Subscription::where(['customer_id' => $customer['id']])->exists();
-            if (!$subscriptions) {
-                return Redirect::to('subscription/create');
-            }else{
-                return view('/subscription');
-            }
-        }else{
-            return view('/customer/create');
-        }
+        $this->middleware('auth');
     }
     public function all(){
         return Auth::user()->customer->subscriptions;

@@ -22,13 +22,13 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::prefix('/customer')->group( function(){
-    Route::get('/', 'CustomerController@show');
-    Route::get('/show', 'CustomerController@show');
+    Route::get('/', 'CustomerController@show')->middleware('auth');
+    Route::get('/show', 'CustomerController@show')->middleware('auth');
     Route::get('/create', 'CustomerController@create');
     Route::post('/create', 'CustomerController@store');
-    Route::get('/edit', 'CustomerController@edit')->middleware('customer');
-    Route::patch('/update', 'CustomerController@update');
-    Route::get('/delete', 'CustomerController@destroy');
+    Route::get('/edit', 'CustomerController@edit')->middleware('auth');
+    Route::patch('/update', 'CustomerController@update')->middleware('auth');
+    Route::get('/delete', 'CustomerController@destroy')->middleware('auth');
 });
 Route::prefix('/subscription')->group( function(){
     Route::get('/create', 'SubscriptionController@create');
