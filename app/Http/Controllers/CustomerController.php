@@ -183,7 +183,7 @@ class CustomerController extends Controller
         /** delete braintree customer */
         $result = $gateway->customer()->delete($myCustomer->braintree_id);
         /** delete our customer */
-        Customer::where(['id', $myCustomer->id])->delete();
+        Customer::where(['id' =>  $myCustomer->id])->delete();
         if ($result->success) {
             Session::flash('message', 'Customer deleted.'); 
             return Redirect::to('home');

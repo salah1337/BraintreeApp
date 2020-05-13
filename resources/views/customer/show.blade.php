@@ -53,7 +53,9 @@
     @else
         You have no active subscriptions.
         <br/>
-        <a href="/subscription/create" class="btn btn-success">Subscribe</a>
+        @if(!$pendingSubscription)
+            <a href="/subscription/create" class="btn btn-success">Subscribe</a>
+        @endif
     @endif
     @if ($pendingSubscription)
             <h5>

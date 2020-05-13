@@ -16,7 +16,7 @@
                         Subscription is on {{ $Subscription->trialDuration }} {{ $Subscription->trialDurationUnit }} trial period.
                         The free trial will end on {{ $Subscription->firstBillingDate }}, if you do not wish to be billed, cancel before then.
                     @else
-                        Your Subscription is active, you will be billed on the {{ $Subscription->billingDayOfMonth }}th of each month.
+                        Your Subscription is active, next billing date is: {{ $Subscription->nextBillingDate }}
                     @endif
                     <br/>
                     <br/>
