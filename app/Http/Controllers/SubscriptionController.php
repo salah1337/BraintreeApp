@@ -18,6 +18,10 @@ class SubscriptionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct() {
+        $this->middleware('auth');
+        $this->middleware('customer');
+    }
     public function index()
     {
         /** check if user is a customer */
@@ -168,43 +172,7 @@ class SubscriptionController extends Controller
      * @param  \App\Subscription  $subscription
      * @return \Illuminate\Http\Response
      */
-    public function switch($id, $planId)
-    {
-        /** get user & subscription */
-        $mySubscription = Subscription::find($id);
-        $user = Auth::user();
-        /** check if user is allowed to edit */
-        $this->authorize('edit-subscription', $user, $mySubscription);
-        /** make new subscription */
-        $gateway = app()->make('Gateway');
-        /** get old subscription from braintree */
-        $oldSubscription = $gateway->subscription()->find($mySubscription->braintree_id);
-        /** get customer */
-        $myCustomer = $user->customer;
-        $braintreeCustomer = $gateway->customer()->find($myCustomer->braintree_id);
-        /** make subscription that starts when old one ends */
-        $res = $gateway->subscription()->create([
-            'paymentMethodToken' => $braintreeCustomer->paymentMethods[0]->token,
-            'planId' => $planId,
-            'firstBillingDate' => $oldSubscription->nextBillingDate
-        ]);
-        $newSubscription = $res->subscription;
-        /** make last one end this month */
-        $gateway->subscription()->update($oldSubscription->id, [
-            'numberOfBillingCycles' => 1,
-        ]);
-        /** save new subscription details in our db */
-        Subscription::create([
-            'paymentMethodToken' => $newSubscription->paymentMethodToken,
-            'planId' => $newSubscription->planId,
-            'braintree_id' => $newSubscription->id,
-            'status' => $newSubscription->status,
-            'customer_id' => $myCustomer->id,
-        ]);
-        /** victory! */
-        Session::flash('message', 'Donezo'); 
-        return Redirect::to('home');
-    }
+
 
     /**
      * Remove the specified resource from storage.

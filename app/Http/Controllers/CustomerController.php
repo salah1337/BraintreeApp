@@ -19,6 +19,9 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct() {
+        $this->middleware('auth');
+    }
     public function index()
     {
         $count = Customer::count();
@@ -183,7 +186,7 @@ class CustomerController extends Controller
         /** delete braintree customer */
         $result = $gateway->customer()->delete($myCustomer->braintree_id);
         /** delete our customer */
-        Customer::delete($myCustomer->id);
+        Customer::where(['id', $myCustomer->id])->delete();
         if ($result->success) {
             Session::flash('message', 'Customer deleted.'); 
             return Redirect::to('home');

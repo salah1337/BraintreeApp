@@ -22,21 +22,21 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::prefix('/customer')->group( function(){
-    Route::get('/', 'CustomerController@show')->middleware('auth');
-    Route::get('/show', 'CustomerController@show')->middleware('auth');
-    Route::get('/create', 'CustomerController@create')->middleware('auth');
-    Route::post('/create', 'CustomerController@store')->middleware('auth');
-    Route::get('/edit', 'CustomerController@edit')->middleware('auth');
-    Route::patch('/update', 'CustomerController@update')->middleware('auth');
-    Route::get('/delete', 'CustomerController@destroy')->middleware('auth');
+    Route::get('/', 'CustomerController@show');
+    Route::get('/show', 'CustomerController@show');
+    Route::get('/create', 'CustomerController@create');
+    Route::post('/create', 'CustomerController@store');
+    Route::get('/edit', 'CustomerController@edit')->middleware('customer');
+    Route::patch('/update', 'CustomerController@update');
+    Route::get('/delete', 'CustomerController@destroy');
 });
 Route::prefix('/subscription')->group( function(){
-    Route::get('/create', 'SubscriptionController@create')->middleware('auth');
-    Route::get('/store/{planId}', 'SubscriptionController@store')->middleware('auth');
-    Route::get('/edit/{id}', 'SubscriptionController@edit')->middleware('auth');
-    Route::get('/switch/{id}/{planId}', 'SubscriptionController@switch')->middleware('auth');
-    Route::get('/show/{id}', 'SubscriptionController@show')->middleware('auth');
-    Route::get('/cancel/{id}', 'SubscriptionController@cancel')->middleware('auth');
-    Route::get('/startnow/{id}', 'SubscriptionManagmentController@startNow')->middleware('auth');
+    Route::get('/create', 'SubscriptionController@create');
+    Route::get('/store/{planId}', 'SubscriptionController@store');
+    Route::get('/edit/{id}', 'SubscriptionController@edit');
+    Route::get('/switch/{id}/{planId}', 'SubscriptionManagmentController@switch');
+    Route::get('/show/{id}', 'SubscriptionController@show');
+    Route::get('/cancel/{id}', 'SubscriptionController@cancel');
+    Route::get('/startnow/{id}', 'SubscriptionManagmentController@startNow');
 });
-Route::get('/subscription/all', 'SubscriptionController@all')->middleware('auth');
+Route::get('/subscription/all', 'SubscriptionController@all');
