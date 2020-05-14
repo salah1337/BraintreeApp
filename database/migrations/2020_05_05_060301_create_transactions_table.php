@@ -15,8 +15,8 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('braintree_id');
-            $table->integer('ammount');
+            $table->string('braintree_id');
+            $table->string('amount');
             $table->bigInteger('customer_id')->unsigned();
             $table->foreign('customer_id')->references('id')->on('customers')
                 ->onDelete('cascade')->onUpdate('cascade');

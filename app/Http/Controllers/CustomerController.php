@@ -89,7 +89,7 @@ class CustomerController extends Controller
     {
         /** check if user is a customer */
         if (Gate::denies('is-customer', Auth::user())) {
-            return view('customer.create');
+            return Redirect::to('customer/create');
         }
         /** create gateway */
         $gateway = app()->make('Gateway');

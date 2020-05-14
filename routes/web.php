@@ -31,6 +31,7 @@ Route::prefix('/customer')->group( function(){
     Route::get('/delete', 'CustomerController@destroy')->middleware('auth');
 });
 Route::prefix('/subscription')->group( function(){
+    Route::get('/all', 'SubscriptionController@all');
     Route::get('/create', 'SubscriptionController@create');
     Route::get('/store/{planId}', 'SubscriptionController@store');
     Route::get('/edit/{id}', 'SubscriptionController@edit');
@@ -39,4 +40,5 @@ Route::prefix('/subscription')->group( function(){
     Route::get('/cancel/{id}', 'SubscriptionController@cancel');
     Route::get('/startnow/{id}', 'SubscriptionManagmentController@startNow');
 });
-Route::get('/subscription/all', 'SubscriptionController@all');
+
+Route::get('/tranny', 'TransactionController@create');

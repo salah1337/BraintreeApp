@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Transaction;
 use Illuminate\Http\Request;
-
+use Auth;
 class TransactionController extends Controller
 {
     /**
@@ -12,6 +12,11 @@ class TransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         //
@@ -25,6 +30,30 @@ class TransactionController extends Controller
     public function create()
     {
         //
+        /** check if user is a customer */
+        $user = Auth::user();
+        $this->authorize('is-customer', $user);
+        /** get braintree customer */
+        $gateway = app()->make('Gateway');
+        $myCustomer = $user->customer;
+        $braintreeCustoemr = $gateway->customer()->find($myCustomer->braintree_id);
+        /** make transaction */
+        $res = $gateway->transaction()->sale([
+            'customerId' => $braintreeCustoemr->id,
+            'amount' => '33',
+            'options' => [
+                'submitForSettlement' => True
+            ]
+        ]);
+        $transaction = $res->transaction;
+        /** save details in our db */
+        $myTransaction = Transaction::create([
+            'braintree_id' => $transaction->id,
+            'amount' => '33',
+            'customer_id' => $myCustomer->id
+        ]);
+        return $myTransaction;
+
     }
 
     /**
