@@ -7,8 +7,8 @@
 require('./bootstrap');
 
 window.Vue = require('vue');
-
-import Vuetify from '../plugins/vuetify'
+import BootstrapVue from 'bootstrap-vue'
+import Vuetify from 'Vuetify'
 
 /**
  * The following block of code may be used to automatically register your
@@ -23,13 +23,14 @@ import Vuetify from '../plugins/vuetify'
 
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('create-customer', require('./components/CreateCustomer.vue').default);
+Vue.component('vue-tify', require('./components/vuetify.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
-
+Vue.use(BootstrapVue)
 const app = new Vue({
     vuetify: Vuetify,
     el: '#app',

@@ -41,4 +41,6 @@ Route::prefix('/subscription')->group( function(){
     Route::get('/startnow/{id}', 'SubscriptionManagmentController@startNow');
 });
 
-Route::get('/tranny', 'TransactionController@create');
+Route::get('/tranny', function () {
+    return view('test');
+});
