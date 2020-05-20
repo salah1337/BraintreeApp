@@ -45,3 +45,4 @@ Route::prefix('/subscription')->group( function(){
 Route::get('/tranny', function () {
     return view('test');
 });
+Route::get('/pricing', 'SubscriptionController@list');

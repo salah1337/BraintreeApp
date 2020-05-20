@@ -40,6 +40,24 @@ class SubscriptionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function list(){
+
+        $user = Auth::user();
+        /** check if user is customer */
+        if (Gate::denies('is-customer', $user)) {
+            return Redirect::to('customer/create');
+        }
+        /** check if user already has an active subscription */
+        if (Gate::allows('is-subbed', $user)) {
+            $activeSubscription = $user->customer->subscriptions->where('status', 'Active')->first();
+
+            return view('/subscription/list', $activeSubscription);
+
+        }
+        return view('/subscription/create');
+
+    }
     public function create()
     {
         $user = Auth::user();

@@ -22,7 +22,7 @@
                             <a class="p-2 text-dark" href="/customer/show">Me</a>
                             <a class="p-2 text-dark" href="/subscription/">Subs</a>
                             <a class="p-2 text-dark" href="/contact">Support</a>
-                            <a class="p-2 text-dark" href="/subscription/create">Pricing</a>
+                            <a class="p-2 text-dark" href="/pricing">Pricing</a>
                           </nav>
                         </div>
                 </div>

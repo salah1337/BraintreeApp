@@ -41,7 +41,6 @@
         </p>
         <button class="btn btn-primary"><a class="text text-white" href="/subscription/switch/{{ $id }}/eee">Move To</a></button>
       </div>
-      
     </div>
   </div>
 
@@ -52,7 +51,8 @@
         var planId = document.getElementById('planId').innerHTML;
         document.querySelectorAll('.plans').forEach(plan => {
             if ( plan.getAttribute('id') === planId ){
-                plan.style.display = 'none';
+                plan.children[2].innerHTML = 'Active'
+                plan.children[2].disabled = true
             };
         });
     </script>
