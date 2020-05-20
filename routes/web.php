@@ -31,6 +31,7 @@ Route::prefix('/customer')->group( function(){
     Route::get('/delete', 'CustomerController@destroy')->middleware('auth');
 });
 Route::prefix('/subscription')->group( function(){
+    Route::get('/', 'SubscriptionController@all');
     Route::get('/all', 'SubscriptionController@all');
     Route::get('/create', 'SubscriptionController@create');
     Route::get('/store/{planId}', 'SubscriptionController@store');

@@ -23,7 +23,17 @@ class SubscriptionController extends Controller
         $this->middleware('auth');
     }
     public function all(){
-        return Auth::user()->customer->subscriptions;
+        $user = Auth::user();
+        /** check if user is customer */
+        if (Gate::denies('is-customer', $user)) {
+            return Redirect::to('customer/create');
+        }
+        $subscriptions = $user->customer->subscriptions;
+        if (!$subscriptions->first()){
+            return Redirect::to('subscription/create');
+        }
+        $data['subscriptions'] = $subscriptions;
+        return view('/subscription/all', $data);
     }
     /**
      * Show the form for creating a new resource.
